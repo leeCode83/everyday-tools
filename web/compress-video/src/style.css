@@ -1,0 +1,234 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Element dengan `display` sendiri (mis. .result grid) akan mengabaikan
+   atribut hidden bila tidak dipaksa ulang. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: light-dark(#fafafa, #111);
+  color: light-dark(#1a1a1a, #eee);
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.privacy-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: light-dark(#555, #bbb);
+}
+
+.dropzone {
+  border: 2px dashed light-dark(#aaa, #555);
+  border-radius: 10px;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone.dragover {
+  border-color: #2f81f7;
+  background: rgba(47, 129, 247, 0.08);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: light-dark(#777, #999);
+  margin: 0.25rem 0 0;
+}
+
+.editor {
+  display: grid;
+  gap: 1rem;
+}
+
+.file-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid light-dark(#ddd, #333);
+  border-radius: 8px;
+}
+
+.file-info {
+  min-width: 0;
+}
+
+.file-info strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+fieldset {
+  border: 1px solid light-dark(#ddd, #333);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+legend {
+  font-size: 0.85rem;
+  padding: 0 0.35rem;
+}
+
+.segment-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Pill-shaped radio: the input stays in the a11y tree but is invisible. */
+.segment {
+  position: relative;
+  border: 1px solid light-dark(#ccc, #444);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.segment input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.segment:has(input:checked) {
+  border-color: #2f81f7;
+  background: rgba(47, 129, 247, 0.12);
+  font-weight: 600;
+}
+
+.segment:has(input:focus-visible) {
+  outline: 2px solid #2f81f7;
+  outline-offset: 1px;
+}
+
+.target-input {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.target-input input {
+  padding: 0.4rem;
+  max-width: 10rem;
+}
+
+button,
+.download {
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font: inherit;
+}
+
+#compress {
+  justify-self: start;
+}
+
+button.ghost {
+  background: none;
+  border: 1px solid light-dark(#ccc, #444);
+  color: inherit;
+}
+
+button.ghost:hover {
+  border-color: currentColor;
+}
+
+.progress-area {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.progress-track {
+  width: 100%;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: light-dark(#e3e3e3, #2a2a2a);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: #2f81f7;
+  transition: width 0.2s;
+}
+
+.result {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.result h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.result-summary {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.result-summary .savings {
+  font-weight: 700;
+  color: light-dark(#1a7f37, #6ccb7f);
+}
+
+.download {
+  display: inline-block;
+  background: #2f81f7;
+  border: 1px solid #2f81f7;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.download:hover {
+  background: #1f6feb;
+}
+
+.error-banner {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid light-dark(#c93c37, #ff8184);
+  border-radius: 8px;
+  color: light-dark(#c93c37, #ff8184);
+  font-size: 0.9rem;
+}

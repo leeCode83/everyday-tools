@@ -1,81 +1,103 @@
-# Implementation Plan: Compress Images (client-side, privacy-first)
+# Implementation Plan: Compress Video (client-side, privacy-first)
 
 ## Overview
 
-Web app kompresi gambar 100% client-side di `web/compress-images/` dalam monorepo `everyday-tools`. Semua proses (decode, encode, download) jalan di browser — tidak ada byte gambar yang keluar device. Stack: TypeScript + Vite, vanilla (tanpa framework), Web Worker untuk encode, Vitest untuk unit test. Fase akhir upgrade encoder ke jSquash (MozJPEG/OxiPNG) di belakang interface yang sama.
-
-Notasi dokumentasi kode: **JSDoc** (deskripsi, `@param`, `@returns`, `@throws` untuk semua export).
+Web tool kompresi video 100% client-side di `web/compress-video/` dalam monorepo
+`everyday-tools`. Video dikompres di browser via **mediabunny** (WebCodecs,
+hardware-accelerated) — tidak ada byte video yang keluar device. Tool ini
+terpisah total dari `compress-images` (folder sendiri, dependency sendiri, nol
+import bersama). Dikembangkan dengan TDD, JSDoc, prinsip DRY/KISS/SRP, dan
+commit kecil per task di branch `feat/compress-video`.
 
 ## Architecture Decisions
 
-1. **Vanilla TS, tanpa framework (KISS).** UI satu halaman sederhana: drop file, slider kualitas, tombol download.
-2. **Logika murni dipisah dari DOM (SRP + testability).** Fungsi non-UI murni di `src/core/` — diuji di Node tanpa browser nyata. `happy-dom`/`jsdom` tidak punya canvas encoder sungguhan, jadi bagian yang menyentuh canvas diisolasi di balik interface.
-3. **Interface `ImageEncoder` (DIP/DRY).** Kontrak tunggal `encode(imageData, options): Promise<Blob>`. Implementasi: `CanvasEncoder` (MVP), `MozJpegEncoder`/`OxiPngEncoder` (jSquash, fase akhir). Penambahan codec tidak menyentuh worker/UI.
-4. **Web Worker sejak awal.** `new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })` (pola resmi Vite). UI tidak freeze saat batch encode.
-5. **Privasi terverifikasi.** Nol dependency runtime di MVP. Hasil `dist/` murni statis, dijalankan via `npx serve dist` — nol network call saat dipakai.
-6. **Pengujian: TDD (red–green–refactor).** Tiap task dimulai dari test gagal. Fungsi canvas-dependent diuji lewat fake/injectable.
-7. **Dokumentasi kode: JSDoc** di semua fungsi/interface yang di-export.
+1. **mediabunny (WebCodecs), bukan ffmpeg.wasm.** Hardware-accelerated (10x
+   lebih cepat dari WASM software encoding), bundle kecil (~50kB vs core 31MB),
+   tanpa header COOP/COEP. API `Conversion` menangani demux → encode → mux
+   sekaligus. Browser modern saja (Chrome 94+, Safari 16.4+, Firefox 130+);
+   feature-detect `VideoEncoder` → pesan error jelas.
+2. **Isolasi penuh dari compress-images.** Satu folder = satu tool (konvensi
+   repo); Vite otomatis mendaftarkan halaman baru. Verifikasi grep di final gate.
+3. **Logika murni di `src/core/` (SRP + testability).** Preset kualitas,
+   hitungan bitrate target, kontrak worker — semuanya pure dan diuji di Node
+   via Vitest (happy-dom). Bagian yang butuh WebCodecs diisolasi di wrapper
+   tipis `videoCompressor.ts`.
+4. **Worker bridge + DIP.** Interface `VideoCompressor` di-inject ke
+   `handleCompressionRequest` → protocol diuji dengan fake compressor, worker
+   tinggal pemasang kabel.
+5. **Output MP4** (codec dipilih mediabunny otomatis, default AVC), audio
+   dipertahankan dengan kualitas mengikuti mode.
+6. **Kontrol kompresi (KISS):** mode *Kualitas* (preset High/Balanced/Small)
+   atau *Target ukuran* (MB) — bitrate dihitung dari durasi:
+   `(targetBytes × 8 × 0.95 / durasi) − budgetAudio(128 kbps)`, clamp minimum,
+   error bila mustahil.
+
+## API mediabunny yang dipakai (terverifikasi via context7)
+
+`Input({formats: ALL_FORMATS, source: new BlobSource(file)})`,
+`input.computeDuration()`, `input.getPrimaryVideoTrack()`/`getPrimaryAudioTrack()`,
+`Output({format: new Mp4OutputFormat(), target: new BufferTarget()})`,
+`Conversion.init({input, output, video: {quality}, audio: {quality}})`,
+`new Quality('high' | 'medium' | 'low')` / `new Quality({bitrate})`,
+`conversion.isValid` / `conversion.discardedTracks`, `conversion.onProgress`,
+`conversion.cancel()`, `await conversion.execute()`, `output.target.buffer`.
 
 ## Struktur target
 
 ```
-web/compress-images/
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts          (+ konfigurasi test Vitest)
+web/compress-video/
+├── index.html                  → satu halaman tool (copy Bahasa Indonesia)
+├── README.md                   → cara pakai, dukungan browser, batasan
 ├── src/
-│   ├── main.ts             → UI: drag-drop, slider, render hasil
-│   ├── worker.ts           → terima EncodeRequest, panggil encoder, balas EncodeResponse
-│   ├── core/
-│   │   ├── types.ts        → EncodeOptions, EncodeRequest/Response, CompressionResult
-│   │   ├── format.ts       → formatBytes, savingsPercent, buildOutputFilename
-│   │   └── protocol.ts     → handleEncodeRequest (murni, encoder di-inject)
-│   ├── encoders/
-│   │   ├── imageEncoder.ts → interface ImageEncoder
-│   │   └── canvasEncoder.ts→ implementasi via OffscreenCanvas/canvas.toBlob
-│   └── style.css
-└── tests/                  → *.test.ts (Vitest, environment happy-dom)
+│   ├── main.ts                 → UI: drop zone, mode, progress, download
+│   ├── style.css               → CSS milik tool ini
+│   ├── worker.ts               → bridge tipis: request → compressor → postMessage
+│   ├── videoCompressor.ts      → wrapper mediabunny (probe + compress)
+│   └── core/
+│       ├── types.ts            → domain types (metadata, request, result)
+│       ├── settings.ts         → preset kualitas + hitung bitrate target
+│       ├── protocol.ts         → union pesan worker + handleCompressionRequest
+│       └── format.ts           → formatBytes, formatDuration, savingsPercent
+└── tests/                      → *.test.ts (Vitest, happy-dom)
 ```
 
 ## Task List
 
-### Phase 1: Foundation
-- [ ] Task 1: tasks/plan.md + tasks/todo.md + scaffold Vite + TypeScript
-- [ ] Task 2: Setup Vitest + happy-dom
+### Phase 0: Foundation
+- Task 1: Arsipkan plan lama (tasks/archive/) + tulis plan/todo baru.
+- Task 2: ESLint 9 flat config + typescript-eslint project-wide, scripts
+  `lint` + `typecheck`, bereskan pelanggaran existing.
 
-### Checkpoint Foundation: `npm test` hijau, `npm run build` sukses, dev server jalan.
+### Phase 1: Core logic (TDD, tanpa DOM)
+- Task 3: core/format.ts — formatBytes, formatDuration, savingsPercent.
+- Task 4: core/types.ts + core/settings.ts — QUALITY_PRESETS,
+  resolveVideoQuality, computeTargetBitrate (safety 0.95, budget audio
+  128 kbps, clamp minimum, TargetTooSmallError).
+- Task 5: core/protocol.ts — union pesan + handleCompressionRequest
+  (compressor di-inject).
 
-### Phase 2: Core logic (TDD, tanpa DOM)
-- [ ] Task 3: core/format.ts — formatBytes, savingsPercent, buildOutputFilename
-- [ ] Task 4: core/types.ts + encoders/imageEncoder.ts — kontrak + clampQuality
-- [ ] Task 5: encoders/canvasEncoder.ts — encoder MVP (dependensi injectable)
-- [ ] Task 6: core/protocol.ts + worker.ts — handler murni, worker tipis
+### Phase 2: Encoding integration
+- Task 6: install mediabunny + videoCompressor.ts (probeVideoFile,
+  compressVideo, buildConversionOptions pure).
+- Task 7: worker.ts — bridge tipis + feature-detect WebCodecs.
+- Task 8: UI — index.html + style.css + main.ts (drop, mode, progress,
+  batal, hasil before→after, download, error Bahasa Indonesia).
 
-### Checkpoint Core Logic: semua unit test hijau, cakupan core tinggi, belum ada UI.
-
-### Phase 3: UI (integrasi vertikal)
-- [ ] Task 7: main.ts — alur dasar satu file (drop, slider, encode, download)
-- [ ] Task 8: batch multi-file + status per file + download semua
-
-### Checkpoint UI: alur end-to-end jalan via `npm run dev` dan `npx serve dist`.
-
-### Phase 4: Upgrade encoder + dokumentasi
-- [ ] Task 9: jSquash encoder (MozJPEG, OxiPNG) di balik interface sama + fallback
-- [ ] Task 10: README + final pass JSDoc/DRY/KISS/SRP
-
-### Checkpoint Complete: semua acceptance criteria terpenuhi, siap review.
-
-## Yang sengaja tidak ada di v1 (KISS)
-
-ZIP batch download (JSZip), PWA/service worker offline, resize/crop, AVIF, background removal. Bisa ditambah belakangan tanpa ubah arsitektur.
+### Phase 3: Integration + dokumentasi
+- Task 9: Kartu tool di web/index.html + README compress-video.
+- Task 10: Final gate — grep isolasi, lint/typecheck/test/build, preview dist.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
-|------|--------|------------|
-| happy-dom/jsdom tidak punya encoder canvas asli | High | Logic murni di core/ diuji penuh di Node; jalur canvas diisolasi di balik `ImageEncoder` + dependensi injectable |
-| WASM jSquash ribet di-bundle Vite | Medium | Fase terakhir, terpisah; CanvasEncoder fallback |
-| ES module build tidak jalan via `file://` | Low | Dokumentasikan `npx serve dist`; `base: './'` |
-| PNG via canvas hasil besar (tanpa optimasi) | Low | OxiPNG di Task 9; dokumentasikan WebP sebagai default |
-| Windows: perintah npm di Git Bash | Low | `npm run ...` standar |
+|---|---|---|
+| WebCodecs tidak ada di browser lama | Med | Feature-detect `VideoEncoder` → pesan error jelas; didokumentasikan di README |
+| typescript-eslint vs TypeScript 7 | Low | Umumnya warning versi saja; bila hard-fail, selaraskan versi |
+| Video besar → memori browser | Med | mediabunny streaming; batasan ~2GB didokumentasikan jujur |
+| happy-dom tak punya WebCodecs | Med | Logika murni pindah ke core/ (teruji); wrapper+worker tipis, E2E manual |
+| Target size mustahil untuk video panjang | Low | TargetTooSmallError + clamp + safety factor, diuji unit |
+
+## Out of scope (v1)
+
+Fallback ffmpeg.wasm, pilihan resolusi, hapus audio, trim/crop, PWA, CI
+workflow, chunking video besar.
