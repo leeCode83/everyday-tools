@@ -1,21 +1,27 @@
 # everyday-tools
 
-Kumpulan CLI tools untuk keperluan pribadi. Semua tool ditulis dalam Python dan
-dijalankan lewat satu entry point: `cli.py`. Semua dependency ter-install di
-dalam venv (`.venv/`), tidak ada yang ter-install global.
+Kumpulan tools untuk keperluan pribadi, dua jenis:
+
+1. **CLI tools (Python)** — dijalankan lewat satu entry point: `cli.py`.
+   Semua dependency ter-install di dalam venv (`.venv/`), tidak ada yang
+   ter-install global.
+2. **Web tools (TypeScript)** — di folder `web/`, satu folder = satu web app
+   statis yang bisa dijalankan lokal. Semua diproses 100% di browser.
 
 ## Struktur
 
 ```
 everyday-tools/
-├── cli.py                  # CLI utama (satu-satunya entry point)
-├── requirements.txt        # daftar dependency projek
+├── cli.py                  # CLI utama Python (satu-satunya entry point)
+├── requirements.txt        # daftar dependency projek Python
 ├── .venv/                  # virtual environment (semua dependency di sini)
-└── tools/                  # kumpulan tool, satu folder = satu tool/service
-    ├── base.py             # kontrak dasar Tool (name, help, configure_parser, run)
-    └── genpass/            # contoh tool — bisa dihapus / dijadikan template
-        ├── __init__.py     # wiring CLI: class Tool + argumen command line
-        └── service.py      # logika inti tool, terpisah dari CLI
+├── tools/                  # kumpulan CLI tool, satu folder = satu tool/service
+│   ├── base.py             # kontrak dasar Tool (name, help, configure_parser, run)
+│   └── genpass/            # contoh tool — bisa dihapus / dijadikan template
+│       ├── __init__.py     # wiring CLI: class Tool + argumen command line
+│       └── service.py      # logika inti tool, terpisah dari CLI
+└── web/                    # kumpulan web tool, satu folder = satu app
+    └── compress-images/    # kompresor gambar 100% client-side (lihat README-nya)
 ```
 
 ## Setup (sekali saja)
