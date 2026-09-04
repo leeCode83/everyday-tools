@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compress Images — 100% lokal di browser</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <h1>Compress Images</h1>
+        <p class="privacy-note">
+          🔒 100% lokal — gambar diproses di browser Anda dan tidak pernah
+          dikirim ke server mana pun.
+        </p>
+      </header>
+
+      <section class="controls">
+        <label>
+          Encoder
+          <select id="encoder">
+            <option value="browser" selected>Cepat (browser)</option>
+            <option value="small">Kecil (MozJPEG / OxiPNG)</option>
+          </select>
+        </label>
+
+        <label>
+          Format keluaran
+          <select id="format">
+            <option value="image/webp" selected>WebP (paling kecil)</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG (lossless)</option>
+          </select>
+        </label>
+
+        <label>
+          Kualitas: <output id="quality-value">80</output>
+          <input
+            id="quality"
+            type="range"
+            min="1"
+            max="100"
+            value="80"
+          />
+        </label>
+
+        <label>
+          Lebar maks (px, opsional)
+          <input
+            id="max-width"
+            type="number"
+            min="1"
+            placeholder="asli"
+          />
+        </label>
+
+        <button id="recompress" type="button" hidden>
+          Kompres ulang semua
+        </button>
+      </section>
+
+      <section
+        id="dropzone"
+        class="dropzone"
+        aria-label="Area drop file gambar"
+      >
+        <p>Tarik &amp; lepas gambar di sini, atau klik untuk memilih file.</p>
+        <p class="hint">Bisa banyak file sekaligus. JPG, PNG, WebP.</p>
+        <input id="file-input" type="file" multiple accept="image/*" hidden />
+      </section>
+
+      <section id="results" class="results" hidden>
+        <div class="results-header">
+          <h2>Hasil</h2>
+          <button id="download-all" type="button">Download semua</button>
+        </div>
+        <ul id="item-list" class="item-list"></ul>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
