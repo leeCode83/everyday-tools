@@ -1,0 +1,3 @@
+# Semua dependency projek ter-install di dalam .venv/.
+# Tambahkan dependency baru di sini, lalu jalankan:
+#   .venv/Scripts/pip install -r requirements.txt
