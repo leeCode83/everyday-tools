@@ -1,42 +1,32 @@
-# Todo: Compress Images
+# Todo: Compress Video
 
-## Phase 1: Foundation
-- [x] Task 1: tasks/plan.md + todo.md + scaffold Vite + TypeScript
-- [x] Task 2: Setup Vitest + happy-dom
+## Phase 0: Foundation
+- [ ] Task 1: Arsipkan plan lama + tulis plan/todo baru
+- [ ] Task 2: ESLint + typecheck scripts project-wide
 
 ### Checkpoint Foundation
-- [x] `npm test` hijau, `npm run build` sukses, dev server jalan
+- [ ] `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` hijau
 
-## Phase 2: Core logic (TDD)
-- [x] Task 3: core/format.ts
-- [x] Task 4: core/types.ts + encoders/imageEncoder.ts
-- [x] Task 5: encoders/canvasEncoder.ts
-- [x] Task 6: core/protocol.ts + worker.ts
+## Phase 1: Core logic (TDD)
+- [ ] Task 3: core/format.ts
+- [ ] Task 4: core/types.ts + core/settings.ts
+- [ ] Task 5: core/protocol.ts
 
 ### Checkpoint Core Logic
-- [x] Semua unit test hijau (35 test), belum ada UI
+- [ ] Semua unit test hijau, lint + typecheck hijau, belum ada UI
 
-## Phase 3: UI
-- [x] Task 7: main.ts alur dasar satu file
-- [x] Task 8: batch multi-file
+## Phase 2: Encoding integration
+- [ ] Task 6: mediabunny + videoCompressor.ts
+- [ ] Task 7: worker.ts bridge
+- [ ] Task 8: UI (index.html + style.css + main.ts)
 
 ### Checkpoint UI
-- [x] End-to-end terverifikasi di browser: drop 2+ file, statistik, download, nol network request eksternal
+- [ ] E2E manual di browser: kompres nyata (preset + target), progress,
+      download, nol network request eksternal; build sukses
 
-## Phase 4: Upgrade + dokumentasi
-- [x] Task 9: jSquash encoder MozJPEG/OxiPNG + fallback
-- [x] Task 10: README + final pass JSDoc/DRY/KISS/SRP
+## Phase 3: Integration + dokumentasi
+- [ ] Task 9: Kartu homepage + README tool
+- [ ] Task 10: Final gate (isolasi + semua gate hijau)
 
 ### Checkpoint Complete
-- [x] Semua acceptance criteria terpenuhi, siap review
-
-## Catatan verifikasi E2E (browser nyata, dist/ di-serve lokal)
-
-- Batch 2 file (PNG + JPEG) terproses, statistik before → after + % tampil benar.
-- Encoder "small" (MozJPEG) bekerja; bug awal skala kualitas (0–1 vs 0–100)
-  ditemukan lewat E2E dan diperbaiki + test diperbarui.
-- File non-gambar → pesan error jelas, tidak crash.
-- Privasi: semua resource berasal dari origin server lokal; nol request
-  eksternal selama kompresi.
-- Penghematan MozJPEG vs canvas di sampel sintetis: hampir setara; WebP
-  tetap format paling kecil. README ditulis jujur soal ini.
+- [ ] Semua acceptance criteria terpenuhi, siap PR
