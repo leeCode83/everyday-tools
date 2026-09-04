@@ -71,6 +71,19 @@ export interface ProgressMessage {
 export type WorkerMessage = CompressionResponse | ProgressMessage;
 
 /**
+ * Message from the UI telling the worker to abort the running job with
+ * this id. Cancellation must travel as a message because an
+ * `AbortSignal` cannot be structured-cloned through `postMessage`.
+ */
+export interface CancelRequest {
+  id: string;
+  type: "cancel";
+}
+
+/** Anything the UI can send to the worker. */
+export type ToWorkerMessage = CompressionRequest | CancelRequest;
+
+/**
  * Strategy that turns one video blob into a compressed blob. Injected into
  * {@link handleCompressionRequest} so the protocol stays unit-testable and
  * the encoding backend stays swappable.

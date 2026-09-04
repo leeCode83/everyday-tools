@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compress Video — 100% lokal di browser</title>
+    <link rel="stylesheet" href="/compress-video/src/style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <p><a href="../">← Semua tools</a></p>
+        <h1>Compress Video</h1>
+        <p class="privacy-note">
+          🔒 100% lokal — video diproses di browser Anda dan tidak pernah
+          dikirim ke server mana pun.
+        </p>
+      </header>
+
+      <section id="unsupported" class="error-banner" hidden>
+        Browser ini tidak mendukung WebCodecs, jadi tool ini tidak bisa
+        berjalan di sini. Gunakan Chrome/Edge 94+, Safari 16.4+, atau
+        Firefox 130+.
+      </section>
+
+      <section
+        id="dropzone"
+        class="dropzone"
+        aria-label="Area drop file video"
+      >
+        <p>Tarik &amp; lepas video di sini, atau klik untuk memilih file.</p>
+        <p class="hint">MP4, WebM, MOV, MKV, dan format video lainnya.</p>
+        <input id="file-input" type="file" accept="video/*" hidden />
+      </section>
+
+      <section id="editor" class="editor" hidden>
+        <div class="file-summary">
+          <div class="file-info">
+            <strong id="file-name"></strong>
+            <p class="hint" id="file-meta"></p>
+          </div>
+          <button id="change-file" type="button" class="ghost">
+            Ganti file
+          </button>
+        </div>
+
+        <fieldset class="mode-picker">
+          <legend>Mode kompresi</legend>
+          <label class="segment">
+            <input type="radio" name="mode" value="preset" checked />
+            Kualitas
+          </label>
+          <label class="segment">
+            <input type="radio" name="mode" value="target" />
+            Target ukuran
+          </label>
+        </fieldset>
+
+        <fieldset id="preset-fieldset" class="mode-options">
+          <legend>Pilih kualitas</legend>
+          <div class="segment-group">
+            <label class="segment">
+              <input type="radio" name="preset" value="high" />
+              High
+            </label>
+            <label class="segment">
+              <input type="radio" name="preset" value="balanced" checked />
+              Balanced
+            </label>
+            <label class="segment">
+              <input type="radio" name="preset" value="small" />
+              Small
+            </label>
+          </div>
+          <p class="hint">
+            High ≈ kualitas terbaik, Small ≈ file terkecil.
+          </p>
+        </fieldset>
+
+        <fieldset id="target-fieldset" class="mode-options" hidden>
+          <legend>Target ukuran file</legend>
+          <label class="target-input">
+            <span>Ukuran target (MB)</span>
+            <input id="target-mb" type="number" min="0.1" step="0.1" value="25" />
+          </label>
+          <p class="hint" id="target-estimate"></p>
+        </fieldset>
+
+        <button id="compress" type="button">Kompres</button>
+      </section>
+
+      <section id="progress-area" class="progress-area" hidden>
+        <p id="progress-label" aria-live="polite">Mengompres… 0%</p>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <button id="cancel" type="button" class="ghost">Batal</button>
+      </section>
+
+      <section id="result" class="result" hidden>
+        <h2>Selesai 🎉</h2>
+        <p id="result-summary" class="result-summary"></p>
+        <a id="download" class="download" download>⬇ Download video terkompres</a>
+        <button id="compress-again" type="button" class="ghost">
+          Kompres video lain
+        </button>
+      </section>
+
+      <p id="error" class="error-banner" hidden></p>
+    </main>
+
+    <script type="module" src="/compress-video/src/main.ts"></script>
+  </body>
+</html>

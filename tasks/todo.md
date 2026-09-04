@@ -17,12 +17,17 @@
 
 ## Phase 2: Encoding integration
 - [x] Task 6: mediabunny + videoCompressor.ts
-- [ ] Task 7: worker.ts bridge
-- [ ] Task 8: UI (index.html + style.css + main.ts)
+- [x] Task 7: worker.ts bridge
+- [x] Task 8: UI (index.html + style.css + main.ts)
 
 ### Checkpoint UI
-- [ ] E2E manual di browser: kompres nyata (preset + target), progress,
-      download, nol network request eksternal; build sukses
+- [x] E2E manual di browser: kompres nyata (preset + target), progress,
+      batal, download, nol network request eksternal; build sukses
+- Catatan E2E: bug `[hidden]` vs CSS display dan kanal batal
+  (AbortSignal tak bisa lewat postMessage) ditemukan lewat E2E dan
+  diperbaiki. Verifikasi: preset 209.4KB→166.2KB; target 0.5MB→262.4KB;
+  guard TargetTooSmallError menonaktifkan tombol; batal di 7% 4K
+  berhenti senyap tanpa error.
 
 ## Phase 3: Integration + dokumentasi
 - [ ] Task 9: Kartu homepage + README tool
