@@ -30,8 +30,18 @@
   berhenti senyap tanpa error.
 
 ## Phase 3: Integration + dokumentasi
-- [ ] Task 9: Kartu homepage + README tool
-- [ ] Task 10: Final gate (isolasi + semua gate hijau)
+- [x] Task 9: Kartu homepage + README tool
+- [x] Task 10: Final gate (isolasi + semua gate hijau)
 
 ### Checkpoint Complete
-- [ ] Semua acceptance criteria terpenuhi, siap PR
+- [x] Semua acceptance criteria terpenuhi, siap PR
+
+## Catatan Final Gate
+
+- Isolasi: grep `compress-images|jsquash` di web/compress-video/ → nol hasil.
+- `npm run lint` ✓ · `npm run typecheck` ✓ · `npm test` (74 test) ✓ ·
+  `npm run build` ✓ (`dist/compress-video/` ikut ter-build).
+- Preview dist terverifikasi E2E di browser: homepage → halaman tool →
+  kompres 209.4 KB → 166.2 KB (hemat 20.6%), nol error console.
+- Bonus terverifikasi: file yang gagal di-probe menampilkan banner error
+  rapi (tanpa crash).
