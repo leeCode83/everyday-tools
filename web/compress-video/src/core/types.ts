@@ -57,6 +57,20 @@ export type CompressionResponse =
   | { id: string; ok: false; error: string };
 
 /**
+ * Intermediate update for one job, posted while the compression runs.
+ * Distinguishable from a {@link CompressionResponse} by its `type` field.
+ */
+export interface ProgressMessage {
+  id: string;
+  type: "progress";
+  /** Fraction completed, between 0 and 1 (inclusive). */
+  progress: number;
+}
+
+/** Anything the worker can post back to the UI for one job. */
+export type WorkerMessage = CompressionResponse | ProgressMessage;
+
+/**
  * Strategy that turns one video blob into a compressed blob. Injected into
  * {@link handleCompressionRequest} so the protocol stays unit-testable and
  * the encoding backend stays swappable.
