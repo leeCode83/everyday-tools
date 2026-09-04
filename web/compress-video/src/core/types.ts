@@ -34,6 +34,14 @@ export interface VideoMetadata {
 /** Reports conversion progress as a number between 0 and 1 (inclusive). */
 export type ProgressCallback = (progress: number) => void;
 
+/** Optional callbacks/controls accompanying one compression call. */
+export interface CompressionHooks {
+  /** Sink for progress updates between 0 and 1 (inclusive). */
+  onProgress?: ProgressCallback;
+  /** Aborting this signal cancels the running compression. */
+  signal?: AbortSignal;
+}
+
 /** One compression job sent from the UI to the worker. */
 export interface CompressionRequest {
   /** Correlation id echoed back on every response for this job. */
@@ -59,13 +67,13 @@ export interface VideoCompressor {
    *
    * @param file - The source video.
    * @param options - Compression settings for this job.
-   * @param onProgress - Optional sink for progress updates (0..1).
+   * @param hooks - Optional progress sink and abort signal.
    * @returns The compressed video as a blob (MP4).
    * @throws Error when compression is impossible or unsupported.
    */
   compress(
     file: Blob,
     options: CompressionOptions,
-    onProgress?: ProgressCallback,
+    hooks?: CompressionHooks,
   ): Promise<Blob>;
 }

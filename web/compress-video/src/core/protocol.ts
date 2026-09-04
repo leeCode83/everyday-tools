@@ -1,7 +1,7 @@
 import type {
+  CompressionHooks,
   CompressionRequest,
   CompressionResponse,
-  ProgressCallback,
   VideoCompressor,
 } from "./types";
 
@@ -16,18 +16,18 @@ import type {
  *
  * @param request - The compression job, with its correlation id.
  * @param compressor - The encoding strategy to run.
- * @param onProgress - Optional sink for 0..1 progress updates emitted by
- *   the compressor while it works.
+ * @param hooks - Optional progress sink and abort signal, forwarded to the
+ *   compressor untouched.
  * @returns A success or failure response echoing the request id.
  */
 export async function handleCompressionRequest(
   request: CompressionRequest,
   compressor: VideoCompressor,
-  onProgress?: ProgressCallback,
+  hooks?: CompressionHooks,
 ): Promise<CompressionResponse> {
   const { id, file, options } = request;
   try {
-    const blob = await compressor.compress(file, options, onProgress);
+    const blob = await compressor.compress(file, options, hooks);
     return { id, ok: true, blob };
   } catch (error) {
     return {

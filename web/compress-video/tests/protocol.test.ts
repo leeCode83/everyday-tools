@@ -27,34 +27,37 @@ describe("handleCompressionRequest", () => {
     );
   });
 
-  it("forwards progress updates to the given callback", async () => {
+  it("forwards progress updates from the compressor's hooks", async () => {
     const onProgress = vi.fn();
     const compressor: VideoCompressor = {
-      compress: (_file, _options, progress) => {
-        progress?.(0.25);
-        progress?.(1);
+      compress: (_file, _options, hooks) => {
+        hooks?.onProgress?.(0.25);
+        hooks?.onProgress?.(1);
         return Promise.resolve(new Blob(["out"]));
       },
     };
 
-    await handleCompressionRequest(REQUEST, compressor, onProgress);
+    const response = await handleCompressionRequest(REQUEST, compressor, {
+      onProgress,
+    });
 
+    expect(response).toEqual({ id: "job-1", ok: true, blob: expect.any(Blob) });
     expect(onProgress).toHaveBeenCalledTimes(2);
     expect(onProgress).toHaveBeenNthCalledWith(1, 0.25);
     expect(onProgress).toHaveBeenNthCalledWith(2, 1);
   });
 
-  it("works without a progress callback", async () => {
-    const compressor: VideoCompressor = {
-      compress: (_file, _options, progress) => {
-        progress?.(0.5);
-        return Promise.resolve(new Blob(["out"]));
-      },
-    };
+  it("forwards an abort signal through the hooks", async () => {
+    const signal = new AbortController().signal;
+    const compressor = fakeCompressor(Promise.resolve(new Blob(["out"])));
 
-    const response = await handleCompressionRequest(REQUEST, compressor);
+    await handleCompressionRequest(REQUEST, compressor, { signal });
 
-    expect(response).toEqual({ id: "job-1", ok: true, blob: expect.any(Blob) });
+    expect(compressor.compress).toHaveBeenCalledWith(
+      REQUEST.file,
+      REQUEST.options,
+      { signal },
+    );
   });
 
   it("returns a failure response when compression throws an Error", async () => {
