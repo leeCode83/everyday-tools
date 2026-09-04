@@ -16,18 +16,21 @@ Gratis, tanpa akun, tanpa batas ukuran.
 
 ## Menjalankan
 
+Tool ini adalah satu halaman dari webapp utama `web/` (bukan project npm
+tersendiri). Semua perintah dijalankan dari `web/`:
+
 ```bash
-cd web/compress-images
+cd web
 npm install
 
-npm run dev        # development server
+npm run dev        # dev server → buka http://localhost:5173/compress-images/
 npm test           # unit test (Vitest)
-npm run build      # produksi → dist/
-npx serve dist     # sajikan hasil build secara lokal
+npm run build      # produksi → dist/ (beserta halaman tool lain)
+npm run preview    # sajikan hasil build secara lokal
 ```
 
 > Catatan: hasil build adalah ES module + Web Worker, jadi buka via server
-> statis (`npx serve dist`), bukan langsung `file://`.
+> statis (`npm run preview`), bukan langsung `file://`.
 
 ## Fitur
 
