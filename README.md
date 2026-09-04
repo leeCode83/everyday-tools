@@ -5,8 +5,9 @@ Kumpulan tools untuk keperluan pribadi, dua jenis:
 1. **CLI tools (Python)** — dijalankan lewat satu entry point: `cli.py`.
    Semua dependency ter-install di dalam venv (`.venv/`), tidak ada yang
    ter-install global.
-2. **Web tools (TypeScript)** — di folder `web/`, satu folder = satu web app
-   statis yang bisa dijalankan lokal. Semua diproses 100% di browser.
+2. **Web tools (TypeScript)** — satu webapp utama di folder `web/` (Vite,
+   multi-page app). `web/index.html` adalah homepage berisi daftar semua tool;
+   satu folder di `web/` = satu halaman tool. Semua diproses 100% di browser.
 
 ## Struktur
 
@@ -20,8 +21,13 @@ everyday-tools/
 │   └── genpass/            # contoh tool — bisa dihapus / dijadikan template
 │       ├── __init__.py     # wiring CLI: class Tool + argumen command line
 │       └── service.py      # logika inti tool, terpisah dari CLI
-└── web/                    # kumpulan web tool, satu folder = satu app
-    └── compress-images/    # kompresor gambar 100% client-side (lihat README-nya)
+└── web/                    # webapp utama (satu project Vite untuk semua web tool)
+    ├── index.html          # homepage: daftar semua tool
+    ├── vite.config.ts      # auto-discover folder tool yang punya index.html
+    └── compress-images/    # halaman tool: kompresor gambar 100% client-side
+        ├── index.html      #   UI tool
+        ├── src/            #   kode TS + CSS tool
+        └── tests/          #   unit test (Vitest)
 ```
 
 ## Setup (sekali saja)
@@ -44,7 +50,23 @@ Selalu jalankan lewat Python dari venv:
 
 Atau setelah mengaktifkan venv cukup `python cli.py ...`.
 
+### Webapp
+
+```bash
+cd web
+npm install        # sekali saja
+npm run dev        # dev server — buka http://localhost:5173 (homepage)
+npm test           # unit test semua tool (Vitest)
+npm run build      # produksi → dist/ (statis, multi-page)
+npm run preview    # sajikan hasil build secara lokal
+```
+
+> Hasil build memakai ES module + Web Worker, jadi sajikan lewat server statis
+> (`npm run preview` / `npx serve dist`), bukan langsung `file://`.
+
 ## Menambah tool baru
+
+### Tool CLI
 
 1. Buat folder baru di `tools/`, misal `tools/kalkulator/`.
 2. Buat `service.py` berisi logika inti tool.
@@ -77,3 +99,11 @@ tool = KalkulatorTool()
 
 Kalau tool butuh dependency baru, tambahkan ke `requirements.txt` lalu jalankan
 `.venv/Scripts/pip install -r requirements.txt`.
+
+### Tool web
+
+1. Buat folder baru di `web/` yang punya `index.html` dan `src/`, misal
+   `web/kalkulator/` (salin pola dari `web/compress-images/`).
+2. Tambahkan satu `<li>` berisi link ke folder itu di `web/index.html`.
+3. Selesai — `vite.config.ts` otomatis mendaftarkan halaman itu untuk dev &
+   build; dependency tool (kalau ada) tambahkan ke `web/package.json`.
